@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 
 function AddMember() {
@@ -11,11 +11,12 @@ function AddMember() {
   const [aadharNumber, setAadharNumber] = useState('');
   const [medicalDetails, setMedicalDetails] = useState('');
 
-  const [membershipType, setMembershipType] = useState('');
+  const [packageTypes, setPackageTypes] = useState([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [packagetype, setpackagetype] = useState('');
 
-  const [totalMembershipFee, setTotalMembershipFee] = useState('');
+  const [totalPackageFee, setTotalPackageFee] = useState('');
   const [paymentPlanType, setPaymentPlanType] = useState('');
   const [initialPaymentAmount, setInitialPaymentAmount] = useState('');
   const [initialPaymentDate, setInitialPaymentDate] = useState('');
@@ -23,6 +24,27 @@ function AddMember() {
   const [dueDate, setDueDate] = useState('');
   const [paymentFrequency, setPaymentFrequency] = useState('');
   const [totalPaymentsRemaining, setTotalPaymentsRemaining] = useState('');
+
+  useEffect(() => {
+    fetchPackageTypes();
+  }, []);
+
+  const fetchPackageTypes = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/packages');
+      if (response.ok) {
+        const data = await response.json();
+        // Extract package type names from data
+        const types = data.map(pkg => pkg.packageName);
+        setPackageTypes(types);
+      } else {
+        throw new Error('Failed to fetch package types');
+      }
+    } catch (error) {
+      console.error('Error fetching package types:', error.message);
+    }
+  };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,11 +54,22 @@ function AddMember() {
   return (
     <>
     <Navbar />
-    <div className="container mt-5">
-      <h1 className='text-center mb-5'>Add New Member</h1>
-      <form onSubmit={handleSubmit} >
-        <div className="row justify-content-center" >
-          <div className="col-md-8 border p-5 rounded" >
+    <div className="container">
+    <div className=" border-bottom border-1">
+                    <div className="row">
+                        <div className="col pt-4 pb-2">
+                            <div className="d-flex justify-content-between align-items-center">
+                                <h3 className="text-center fw-bold mt-3">Add New Package</h3>
+                                <a className='btn btn-dark fw-bold btn-md' href='/admin/Package/allPackages'>Go to Package List</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>                 <div className='d-flex justify-content-center align-items-center mt-5'>
+
+      <div className="col-md-8 border p-5 rounded">
+
+      <form onSubmit={handleSubmit}>
+            <div className='mb-5'>
             <h2 className='panel-title fs-3 mb-3 mt-5'>Personal Details</h2>
             <div className='row mb-3'>
               <div className="col">
@@ -102,19 +135,20 @@ function AddMember() {
               </div>
             </div>
 
-            <h2 className='panel-title fs-3 mb-3 mt-5'>Membership Plan</h2>
+            <h2 className='panel-title fs-3 mb-3 mt-5'>Package Plan</h2>
             <div className="row mb-3">
-              <div className="col">
-                <div className="form-floating">
-                  <select className="form-select form-select-sm" id="membershipType" value={membershipType} onChange={(e) => setMembershipType(e.target.value)} required>
-                    <option value="">Select Membership Type</option>
-                    <option value="basic">Basic</option>
-                    <option value="premium">Premium</option>
-                    <option value="gold">Gold</option>
-                  </select>
-                  <label htmlFor="membershipType">Membership Type</label>
-                </div>
+            <div className="col">
+              <div className="form-floating">
+                <select className="form-select form-select-sm" id="packagetype" value={packagetype} onChange={(e) => setpackagetype(e.target.value)} required>
+                  <option value="">Select Package Type</option>
+                  {/* Dynamically generate options for package types */}
+                  {packageTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+                <label htmlFor="packagetype">Package Type</label>
               </div>
+            </div>
 
               <div className="col">
                 <div className="form-floating">
@@ -135,8 +169,8 @@ function AddMember() {
             <div className="row mb-3">
               <div className="col">
                 <div className="form-floating">
-                  <input type="text" className="form-control form-control-sm" id="totalMembershipFee" placeholder="Total Membership Fee" value={totalMembershipFee} onChange={(e) => setTotalMembershipFee(e.target.value)} required />
-                  <label htmlFor="totalMembershipFee">Total Membership Fee</label>
+                  <input type="text" className="form-control form-control-sm" id="totalPackageFee" placeholder="Total Package Fee" value={totalPackageFee} onChange={(e) => setTotalPackageFee(e.target.value)} required />
+                  <label htmlFor="totalPackageFee">Total Package Fee</label>
                 </div>
               </div>
               <div className="col">
@@ -194,13 +228,15 @@ function AddMember() {
               </div>
             </div>
 
-            <div class="form-group text-end">
-              <button type="submit" id="submit_btn" class="btn btn-md btn-dark">Save Record</button>
+            <div className="form-group text-end">
+              <button type="submit" id="submit_btn" className="btn btn-md btn-dark">Save Record</button>
             </div>
           </div>
-        </div>
       </form>
+      </div>
     </div>
+    </div>
+
     </>
   );
 }
